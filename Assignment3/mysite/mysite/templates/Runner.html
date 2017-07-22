@@ -1,0 +1,153 @@
+﻿
+<!--case details section-->
+<div> <input type="text" size='40' placeholder="Type your Id" id="runnerid"><button class="btn btn-default btn-primary" type="submit" onclick="lookrunner();">Click to look for buddies</button></div>
+<div id='mapdiv' style='height:600px;border:1px solid' class="margin-b20"></div>
+        
+
+             
+
+
+
+<!--=============================================
+            all scripts here...
+===============================================-->
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+
+
+<!-- Jquery UI Accordion -->
+<script type="text/javascript" src="/Resources/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+
+<!-- Bootstrap core JavaScript -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="/Resources/js/jasny-bootstrap.js"></script>
+<script type="text/javascript" src="/Resources/js/oneservice.js"></script>
+<script type="text/javascript" src="/Resources/js/background.cycle.min.js"></script>
+<!-- OneMap -->
+<script type="text/javascript" src="/Resources/js/onemap_lib.js"></script>
+<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+<script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+
+<script>
+    var mymap = L.map('mapdiv').setView([53, 10], 5);
+
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiaG9yc3QxOTg5IiwiYSI6ImNpbW1uYXM3NDAwMWh2cmtydWM3bGZ6enYifQ.mcyFvOuODspaQrePnzWGXA', {
+        maxZoom: 18,
+        attribution: 'for project assignment 3,CS4242',
+        id: 'mapbox.streets'
+    }).addTo(mymap);
+
+
+    //L.marker([51.5, -0.09]).addTo(mymap)
+    //    .bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
+
+    //L.circle([51.508, -0.11], 500, {
+    //    color: 'red',
+    //    fillColor: '#f03',
+    //    fillOpacity: 0.5
+    //}).addTo(mymap).bindPopup("I am a circle.");
+
+    //L.polygon([
+    //    [51.509, -0.08],
+    //    [51.503, -0.06],
+    //    [51.51, -0.047]
+    //]).addTo(mymap).bindPopup("I am a polygon.");
+
+
+    var popup = L.popup();
+
+    function onMapClick(e) {
+        //popup
+        //    .setLatLng(e.latlng)
+        //    .setContent("You clicked the map at " + e.latlng.toString())
+        //    .openOn(mymap);
+    }
+
+    mymap.on('click', onMapClick);
+    function lookrunner() {
+        var id=$('#runnerid').val();
+        if(id.length<10)
+        return;
+         
+        $.get('/load/'+id, function(result) { handleLoadR(result) });
+    }
+
+    function handleLoadR(results) {
+        var obj = JSON.parse(results);
+        var tempname = '';
+        var templat = 0;
+        var templong = 0;
+        var htmlstr='';
+        for (i = 0; i < obj.length; i++) {
+            if(i==0)
+            {
+            //load my self
+         tempname = obj[i].fields["name"];
+            templat = obj[i].fields["lat"];
+            templong = obj[i].fields["lon"];
+            htmlstr="<b>Meself:</b><br /> " + tempname + ".";
+            if(obj[i].fields["gender"].length>1)
+            htmlstr+="<br/>Gender:"+obj[i].fields["gender"];
+            if(obj[i].fields["type"]=='0')
+            htmlstr+="<br/>Type: Unkown";
+            else if(obj[i].fields["type"]=='1')
+            htmlstr+="<br/>Type: Interval training";
+            else if(obj[i].fields["type"]=='2')
+            htmlstr+="<br/>Type: Casual Jogger";
+            else if(obj[i].fields["type"]=='3')
+            htmlstr+="<br/>Type: Marathoner";   
+             mymap.setView(new L.LatLng(templat, templong), 11);
+
+    	    L.circle([templat, templong], 20000, {
+          color: 'red',
+          fillColor: '#f03',
+         fillOpacity: 0.5
+         }).addTo(mymap).bindPopup("My circle");
+           
+            }
+            tempname = obj[i].fields["name"];
+            templat = obj[i].fields["lat"];
+            templong = obj[i].fields["lon"];
+            if(i>0)
+            htmlstr="<b>Hello!</b><br />My name is " + tempname + ".";
+            else
+            htmlstr="<b>That is Me!</b><br /> " + tempname + ".";
+            
+            if(obj[i].fields["gender"].length>1)
+            htmlstr+="<br/>Gender:"+obj[i].fields["gender"];
+            if(obj[i].fields["type"]=='0')
+            htmlstr+="<br/>Type: Unkown";
+            else if(obj[i].fields["type"]=='1')
+            htmlstr+="<br/>Type: Interval training";
+            else if(obj[i].fields["type"]=='2')
+            htmlstr+="<br/>Type: Casual Jogger";
+            else if(obj[i].fields["type"]=='3')
+            htmlstr+="<br/>Type: Marathoner";
+            L.marker([templat, templong]).addTo(mymap)
+                .bindPopup(htmlstr).openPopup();
+
+        }
+    }
+//     function renderButton() {
+//         gapi.signin2.render('google-login',
+//         {
+//             'scope': 'https://www.googleapis.com/auth/plus.login',
+//             'width': 250,
+//             'height': 50,
+//             'longtitle': true,
+//             'theme': 'dark',
+//             'onsuccess': onSuccess,
+//             'onfailure': onFailure
+//         });
+//     }
+//         function onSuccess(googleUser) {
+//         var username = googleUser.getBasicProfile().getName();
+//         var email = googleUser.getBasicProfile().getEmail();
+//          $.get('/index/LoadRunners/', function(result) { handleLoadR(result) });
+//         });
+//     }
+
+
+</script>
